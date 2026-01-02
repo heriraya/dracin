@@ -1,11 +1,13 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronDown, Maximize2, List, Play } from "lucide-react";
+import { ChevronLeft, ChevronDown, Maximize2, List, Play, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { fetchDetail, fetchAllEpisodes } from "@/lib/api";
 import { PlayerSkeleton } from "@/components/LoadingSkeleton";
 import { Helmet } from "react-helmet-async";
 import { useWatchHistory } from "@/hooks/useWatchHistory";
+
+const API_BASE = "https://api.sansekai.my.id/api/dramabox";
 
 export default function PlayPage() {
   const { bookId } = useParams<{ bookId: string }>();
@@ -16,6 +18,9 @@ export default function PlayPage() {
   const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
   const [showEpisodeList, setShowEpisodeList] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [loadingVideo, setLoadingVideo] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const { addToHistory, updateProgress, getLastWatched } = useWatchHistory();
 
   const { data: drama, isLoading: loadingDetail } = useQuery({
@@ -30,6 +35,49 @@ export default function PlayPage() {
     enabled: !!bookId,
   });
 
+  // Fetch video stream URL
+  const fetchVideoStream = async (episodeNum: number) => {
+    if (!bookId) return;
+    
+    setLoadingVideo(true);
+    setVideoError(null);
+    setVideoUrl(null);
+    
+    try {
+      console.log(`Fetching stream for bookId: ${bookId}, episode: ${episodeNum}`);
+      
+      const res = await fetch(`${API_BASE}/stream?bookId=${bookId}&episode=${episodeNum}`);
+      
+      if (!res.ok) {
+        const text = await res.text();
+        if (text.includes('limit') || text.includes('rate')) {
+          throw new Error('Rate limit tercapai. Tunggu beberapa menit.');
+        }
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      console.log('Stream response:', data);
+      
+      // Try different possible field names for video URL
+      const url = data.videoUrl || data.url || data.video || data.m3u8 || data.playUrl || data.streamUrl;
+      
+      if (url) {
+        setVideoUrl(url);
+        console.log('Video URL set:', url);
+      } else {
+        console.error('No video URL in response:', data);
+        throw new Error('Video URL tidak ditemukan dalam response API');
+      }
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error fetching video:', err);
+      setVideoError(err.message);
+    } finally {
+      setLoadingVideo(false);
+    }
+  };
+
   // Check if there's a saved progress for this drama
   useEffect(() => {
     if (bookId && !searchParams.get("ep")) {
@@ -39,6 +87,13 @@ export default function PlayPage() {
       }
     }
   }, [bookId, searchParams, getLastWatched]);
+
+  // Fetch video when episode changes
+  useEffect(() => {
+    if (bookId && currentEpisode) {
+      fetchVideoStream(currentEpisode);
+    }
+  }, [bookId, currentEpisode]);
 
   // Save to history when drama loads or episode changes
   useEffect(() => {
@@ -71,8 +126,6 @@ export default function PlayPage() {
     return () => video.removeEventListener("timeupdate", handleTimeUpdate);
   }, [bookId, currentEpisode, updateProgress]);
 
-  const currentEpisodeData = episodes?.[currentEpisode - 1];
-
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -92,6 +145,12 @@ export default function PlayPage() {
         videoRef.current.requestFullscreen();
       }
     }
+  };
+
+  const handleEpisodeChange = (ep: number) => {
+    setCurrentEpisode(ep);
+    setShowEpisodeList(false);
+    // Video will auto-fetch due to useEffect
   };
 
   if (loadingDetail || loadingEpisodes) {
@@ -119,18 +178,51 @@ export default function PlayPage() {
       <div className="min-h-screen bg-background">
         {/* Video Player Container */}
         <div className="relative aspect-[9/16] max-h-[85vh] bg-surface-1">
+          {/* Loading State */}
+          {loadingVideo && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <p className="text-sm text-foreground">Loading episode {currentEpisode}...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {videoError && !loadingVideo && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+              <div className="text-center px-4 max-w-md">
+                <p className="text-destructive mb-4">{videoError}</p>
+                <button
+                  onClick={() => fetchVideoStream(currentEpisode)}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Coba Lagi
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Video */}
-          {currentEpisodeData?.videoUrl ? (
+          {videoUrl && !videoError ? (
             <video
               ref={videoRef}
-              src={currentEpisodeData.videoUrl}
+              src={videoUrl}
               className="w-full h-full object-contain"
               onClick={handlePlayPause}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
+              onError={(e) => {
+                console.error('Video error:', e);
+                setVideoError('Gagal memuat video. Format mungkin tidak didukung.');
+              }}
               controls
-            />
-          ) : (
+              autoPlay
+            >
+              <source src={videoUrl} type="application/x-mpegURL" />
+              <source src={videoUrl} type="video/mp4" />
+            </video>
+          ) : !loadingVideo && !videoError ? (
             <div className="relative w-full h-full">
               <img
                 src={drama.coverWap}
@@ -139,17 +231,17 @@ export default function PlayPage() {
               />
               <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
                 <button
-                  onClick={handlePlayPause}
+                  onClick={() => fetchVideoStream(currentEpisode)}
                   className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center hover:bg-primary transition-colors"
                 >
                   <Play className="w-8 h-8 text-primary-foreground fill-current ml-1" />
                 </button>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Top Controls */}
-          <div className="absolute top-0 left-0 right-0 gradient-top-overlay p-4">
+          <div className="absolute top-0 left-0 right-0 gradient-top-overlay p-4 z-20">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => navigate(-1)}
@@ -173,10 +265,11 @@ export default function PlayPage() {
           </div>
 
           {/* Bottom Controls */}
-          <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+          <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-20">
             <button
               onClick={() => setCurrentEpisode((prev) => Math.min(prev + 1, drama.chapterCount))}
-              className="p-2 rounded-full bg-background/40 backdrop-blur-sm hover:bg-background/60 transition-colors"
+              disabled={currentEpisode >= drama.chapterCount}
+              className="p-2 rounded-full bg-background/40 backdrop-blur-sm hover:bg-background/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronDown className="w-5 h-5 text-foreground" />
             </button>
@@ -235,10 +328,7 @@ export default function PlayPage() {
                 {Array.from({ length: drama.chapterCount }, (_, i) => i + 1).map((ep) => (
                   <button
                     key={ep}
-                    onClick={() => {
-                      setCurrentEpisode(ep);
-                      setShowEpisodeList(false);
-                    }}
+                    onClick={() => handleEpisodeChange(ep)}
                     className={`py-2 rounded-lg text-sm font-medium transition-colors ${
                       ep === currentEpisode
                         ? "bg-primary text-primary-foreground"
