@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Film, AlertCircle, Loader2 } from 'lucide-react';
 
-const API_BASE = 'https://dramabox.sansekai.my.id/api/dramabox';
+const API_BASE = 'https://api.sansekai.my.id/api/dramabox';
 
 export default function DramaBoxPlayer() {
   const [dramas, setDramas] = useState([]);
@@ -223,4 +223,28 @@ export default function DramaBoxPlayer() {
             </div>
 
             {loading ? (
-              <div className="flex items-cent
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span className="ml-3">Loading episodes...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {episodes.map((ep, idx) => (
+                  <button
+                    key={ep.chapterId}
+                    onClick={() => playEpisode(selectedDrama, idx + 1)}
+                    className="bg-gray-700 hover:bg-purple-600 rounded-lg p-4 transition flex flex-col items-center gap-2"
+                  >
+                    <Play className="w-6 h-6" />
+                    <span className="text-sm font-semibold">EP {idx + 1}</span>
+                    {ep.isVip && <span className="text-xs text-yellow-400">VIP</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
