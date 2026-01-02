@@ -32,7 +32,7 @@ export interface DramaDetail extends Drama {
   episodes?: Episode[];
 }
 
-// Helper to extract array from API response (handles both direct array and {data: [...]} formats)
+// Helper to extract array from API response
 function extractArray<T>(response: unknown): T[] {
   if (Array.isArray(response)) {
     return response;
@@ -46,46 +46,61 @@ function extractArray<T>(response: unknown): T[] {
   return [];
 }
 
+// Base fetch with error handling
+async function apiFetch(endpoint: string): Promise<any> {
+  try {
+    const url = `${API_BASE}${endpoint}`;
+    console.log('Fetching:', url);
+    
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'DramaBoxApp/1.0'
+      }
+    });
+    
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('API Error:', res.status, text);
+      throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    }
+    
+    const json = await res.json();
+    console.log('Response:', json);
+    return json;
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    throw error;
+  }
+}
+
 export async function fetchLatest(): Promise<Drama[]> {
-  const res = await fetch(`${API_BASE}/dramabox/latest`);
-  if (!res.ok) throw new Error("Failed to fetch latest dramas");
-  const json = await res.json();
+  const json = await apiFetch('/dramabox/latest');
   return extractArray<Drama>(json);
 }
 
 export async function fetchTrending(): Promise<Drama[]> {
-  const res = await fetch(`${API_BASE}/dramabox/trending`);
-  if (!res.ok) throw new Error("Failed to fetch trending dramas");
-  const json = await res.json();
+  const json = await apiFetch('/dramabox/trending');
   return extractArray<Drama>(json);
 }
 
 export async function fetchForYou(): Promise<Drama[]> {
-  const res = await fetch(`${API_BASE}/dramabox/foryou`);
-  if (!res.ok) throw new Error("Failed to fetch for you dramas");
-  const json = await res.json();
+  const json = await apiFetch('/dramabox/foryou');
   return extractArray<Drama>(json);
 }
 
 export async function fetchVip(): Promise<Drama[]> {
-  const res = await fetch(`${API_BASE}/dramabox/vip`);
-  if (!res.ok) throw new Error("Failed to fetch VIP dramas");
-  const json = await res.json();
+  const json = await apiFetch('/dramabox/vip');
   return extractArray<Drama>(json);
 }
 
 export async function fetchDubIndo(): Promise<Drama[]> {
-  const res = await fetch(`${API_BASE}/dramabox/dubindo`);
-  if (!res.ok) throw new Error("Failed to fetch dubbed dramas");
-  const json = await res.json();
+  const json = await apiFetch('/dramabox/dubindo');
   return extractArray<Drama>(json);
 }
 
 export async function fetchDetail(bookId: string): Promise<DramaDetail> {
-  const res = await fetch(`${API_BASE}/dramabox/detail?bookId=${bookId}`);
-  if (!res.ok) throw new Error("Failed to fetch drama detail");
-  const json = await res.json();
-  // Handle both direct object and {data: {...}} formats
+  const json = await apiFetch(`/dramabox/detail?bookId=${bookId}`);
   if (json && typeof json === "object" && "data" in json) {
     return json.data;
   }
@@ -93,32 +108,52 @@ export async function fetchDetail(bookId: string): Promise<DramaDetail> {
 }
 
 export async function fetchAllEpisodes(bookId: string): Promise<Episode[]> {
-  const res = await fetch(`${API_BASE}/dramabox/allepisode?bookId=${bookId}`);
-  if (!res.ok) throw new Error("Failed to fetch episodes");
-  const json = await res.json();
+  const json = await apiFetch(`/dramabox/allepisode?bookId=${bookId}`);
   return extractArray<Episode>(json);
 }
 
 export async function searchDramas(query: string): Promise<Drama[]> {
-  const res = await fetch(`${API_BASE}/dramabox/search?query=${encodeURIComponent(query)}`);
-  if (!res.ok) throw new Error("Failed to search dramas");
-  const json = await res.json();
+  const json = await apiFetch(`/dramabox/search?query=${encodeURIComponent(query)}`);
   return extractArray<Drama>(json);
 }
 
 export async function fetchPopularSearch(): Promise<string[]> {
-  const res = await fetch(`${API_BASE}/dramabox/populersearch`);
-  if (!res.ok) throw new Error("Failed to fetch popular searches");
-  const json = await res.json();
+  const json = await apiFetch('/dramabox/populersearch');
   return extractArray<string>(json);
 }
 
 export async function fetchRandomDrama(): Promise<Drama> {
-  const res = await fetch(`${API_BASE}/dramabox/randomdrama`);
-  if (!res.ok) throw new Error("Failed to fetch random drama");
-  const json = await res.json();
+  const json = await apiFetch('/dramabox/randomdrama');
   if (json && typeof json === "object" && "data" in json) {
     return json.data;
   }
   return json;
+}
+
+// Test function untuk debugging
+export async function testAPI() {
+  console.log('=== Testing API ===');
+  
+  try {
+    console.log('\n1. Testing /dramabox/latest');
+    const latest = await fetchLatest();
+    console.log('✓ Latest dramas:', latest.length);
+    
+    if (latest.length > 0) {
+      const firstDrama = latest[0];
+      console.log('\n2. Testing /dramabox/detail');
+      const detail = await fetchDetail(firstDrama.bookId);
+      console.log('✓ Drama detail:', detail.bookName);
+      
+      console.log('\n3. Testing /dramabox/allepisode');
+      const episodes = await fetchAllEpisodes(firstDrama.bookId);
+      console.log('✓ Episodes:', episodes.length);
+      
+      if (episodes.length > 0) {
+        console.log('\n📺 First episode video URL:', episodes[0].videoUrl);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Test failed:', error);
+  }
 }
