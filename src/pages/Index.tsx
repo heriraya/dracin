@@ -8,7 +8,7 @@ const Index = () => {
   return (
     <main className="min-h-screen">
       <HeroSection
-        title="Untuk Kamu"
+        title="Drama Untuk Anda"
         description="Drama pilihan yang dipersonalisasi khusus untukmu. Temukan cerita seru yang sesuai selera!"
         icon="sparkles"
       />
