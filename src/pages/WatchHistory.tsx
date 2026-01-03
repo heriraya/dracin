@@ -190,24 +190,14 @@ export default function WatchHistory() {
                 {/* Poster */}
                 <Link
                   to={`/detail/${item.id}`}
-                  className="block aspect-[2/3] relative overflow-hidden"
+                  className="block aspect-[2/3] relative overflow-hidden bg-muted"
                 >
-                  {item.poster ? (
-                    <img
-                      src={item.poster}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      loading="lazy"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect fill='%23333' width='200' height='300'/%3E%3Ctext fill='%23666' font-family='sans-serif' font-size='14' x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle'%3ENo Image%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center">
-                      <Play className="w-12 h-12 text-muted-foreground" />
-                    </div>
-                  )}
+                  <img
+                    src={item.poster}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
                   
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -217,6 +207,13 @@ export default function WatchHistory() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Episode Badge */}
+                  {item.episodeIndex !== undefined && (
+                    <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-black/80 backdrop-blur-sm text-xs font-medium text-white">
+                      EP {item.episodeIndex + 1}
+                    </div>
+                  )}
                 </Link>
 
                 {/* Info */}
@@ -234,6 +231,13 @@ export default function WatchHistory() {
                     <Clock className="w-3 h-3" />
                     <span>{formatDate(item.lastWatched)}</span>
                   </div>
+
+                  {/* Episode Info */}
+                  {item.episodeIndex !== undefined && (
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Terakhir: Episode {item.episodeIndex + 1}
+                    </p>
+                  )}
 
                   {/* Actions */}
                   <div className="flex gap-2">
