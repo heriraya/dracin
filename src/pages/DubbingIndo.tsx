@@ -4,7 +4,7 @@ import { DramaCard } from "@/components/DramaCard";
 import { DramaCardSkeleton } from "@/components/DramaCardSkeleton";
 import type { Drama } from "@/types/drama";
 
-const API_BASE = "https://api.sansekai.my.id/api/dramabox";
+const API_BASE = "https://dramabox.sansekai.my.id/api/dramabox/latest";
 
 type ClassifyType = "terbaru" | "terpopuler";
 
