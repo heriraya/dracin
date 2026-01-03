@@ -104,16 +104,18 @@ export default function Watch() {
     }
   };
 
-  useEffect(() => {
-  if (!detail) return;
+ useEffect(() => {
+  const book = detailData?.data?.book;
+  if (!book) return;
 
   saveWatchHistory({
-    id: detail.id,
-    title: detail.title,
-    poster: detail.poster,
+    id: book.bookId ?? book.id,
+    title: book.bookName,
+    poster: book.cover || book.bookCover || "",
     lastWatched: Date.now(),
   });
-}, [detail]);
+}, [detailData]);
+
   
   // Now we can have early returns AFTER all hooks
   if (detailLoading || episodesLoading) {
