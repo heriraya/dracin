@@ -109,17 +109,23 @@ useEffect(() => {
 
   const book = detailData.data.book;
   
-  // Pilih poster yang tersedia
-  const poster = book.coverVertical || book.coverHorizontal || book.cover || "";
+  // Fungsi untuk membersihkan URL dari query parameters
+  const cleanImageUrl = (url: string) => {
+    if (!url) return "";
+    return url.split("?")[0]; // Hapus semua query params seperti ?t=xxxxx
+  };
+  
+  const posterUrl = book.coverVertical || book.coverHorizontal || book.cover || "";
+  const cleanPoster = cleanImageUrl(posterUrl);
 
   saveWatchHistory({
     id: String(book.bookId),
     title: book.bookName || "Untitled",
-    poster: poster,
+    poster: cleanPoster, // Simpan URL bersih tanpa timestamp
     lastWatched: Date.now(),
-    episodeIndex: currentEpisode, // ← TAMBAHKAN INI untuk simpan episode terakhir
+    episodeIndex: currentEpisode,
   });
-}, [detailData, currentEpisode]); // ← TAMBAHKAN currentEpisode di dependency
+}, [detailData, currentEpisode]);
   
   // Now we can have early returns AFTER all hooks
   if (detailLoading || episodesLoading) {
