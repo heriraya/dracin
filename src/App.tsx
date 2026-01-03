@@ -11,6 +11,7 @@ import DubbingIndo from "./pages/DubbingIndo";
 import Detail from "./pages/Detail";
 import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
+import History from "./pages/History";
 
 
 const queryClient = new QueryClient();
