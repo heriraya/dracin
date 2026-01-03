@@ -10,6 +10,7 @@ const navLinks = [
   { path: "/terbaru", label: "Terbaru" },
   { path: "/terpopuler", label: "Terpopuler" },
   { path: "/sulih-suara", label: "Sulih Suara" },
+  { path: "/netshort", label: "NetShort" },
 ];
 
 export function Header() {
