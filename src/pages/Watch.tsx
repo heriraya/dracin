@@ -105,21 +105,21 @@ export default function Watch() {
   };
 
 useEffect(() => {
-  if (!detailData) return;
+  if (!detailData?.data?.book) return;
 
-  // struktur API dramabox
-  const book = detailData.data?.book;
-  if (!book) return;
+  const book = detailData.data.book;
+  
+  // Pilih poster yang tersedia
+  const poster = book.coverVertical || book.coverHorizontal || book.cover || "";
 
   saveWatchHistory({
     id: String(book.bookId),
-    title: book.bookName,
-    poster: book.coverVertical || book.coverHorizontal || "",
+    title: book.bookName || "Untitled",
+    poster: poster,
     lastWatched: Date.now(),
-    episodeIndex: currentEpisode, // Tambahkan ini agar bisa lanjut dari episode terakhir
+    episodeIndex: currentEpisode, // ← TAMBAHKAN INI untuk simpan episode terakhir
   });
-}, [detailData, currentEpisode]); 
-
+}, [detailData, currentEpisode]); // ← TAMBAHKAN currentEpisode di dependency
   
   // Now we can have early returns AFTER all hooks
   if (detailLoading || episodesLoading) {
