@@ -104,6 +104,23 @@ export default function Watch() {
     }
   };
 
+useEffect(() => {
+  if (!detailData) return;
+
+  // struktur API dramabox
+  const book = detailData.data?.book;
+  if (!book) return;
+
+  saveWatchHistory({
+    id: String(book.bookId),
+    title: book.bookName,
+    poster:
+      book.coverVertical ||
+      book.coverHorizontal ||
+      "",
+    lastWatched: Date.now(),
+  });
+}, [detailData]);
 
   
   // Now we can have early returns AFTER all hooks
