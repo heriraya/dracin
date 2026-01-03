@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Drama, SearchResult } from "@/types/drama";
 
-const API_BASE = "https://api.sansekai.my.id/api/dramabox/vip";
+const API_BASE = "https://api.sansekai.my.id/api/dramabox";
 
 async function fetchDramas(endpoint: string): Promise<Drama[]> {
   const response = await fetch(`${API_BASE}/${endpoint}`);
@@ -21,6 +21,14 @@ async function searchDramas(query: string): Promise<SearchResult[]> {
     throw new Error("Failed to search dramas");
   }
   return response.json();
+}
+
+export function vip() {
+  return useQuery({
+    queryKey: ["dramas", "vip"],
+    queryFn: () => fetchDramas("vip"),
+    staleTime: 1000 * 60 * 5,
+  });
 }
 
 export function useForYouDramas() {
