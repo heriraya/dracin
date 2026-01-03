@@ -12,7 +12,7 @@ import Detail from "./pages/Detail";
 import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
 import WatchHistory from "./pages/WatchHistory";
-
+import { FloatingBottomNav } from "./components/FloatingBottomNav";
 
 const queryClient = new QueryClient();
 
@@ -30,9 +30,10 @@ const App = () => (
           <Route path="/sulih-suara" element={<DubbingIndo />} />
           <Route path="/detail/:bookId" element={<Detail />} />
           <Route path="/watch/:bookId" element={<Watch />} />
-          <Route path="*" element={<NotFound />} />
           <Route path="/history" element={<WatchHistory />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        <FloatingBottomNav /> {/* ← Tambahkan ini */}
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
