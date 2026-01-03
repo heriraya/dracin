@@ -32,7 +32,7 @@ const App = () => (
           <Route path="/watch/:bookId" element={<Watch />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/netshort" element={<NetShortList />} />
-          <Route path="/watch/netshort/:id" element={<WatchNetShort />} />
+          <Route path="/netshort/:shortPlayId" element={<WatchNetShort />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
