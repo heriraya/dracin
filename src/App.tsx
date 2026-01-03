@@ -11,6 +11,8 @@ import DubbingIndo from "./pages/DubbingIndo";
 import Detail from "./pages/Detail";
 import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
+import NetShortList from "@/pages/netshort/NetShortList";
+import WatchNetShort from "@/pages/netshort/WatchNetShort";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/detail/:bookId" element={<Detail />} />
           <Route path="/watch/:bookId" element={<Watch />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/netshort" element={<NetShortList />} />
+          <Route path="/watch/netshort/:id" element={<WatchNetShort />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
