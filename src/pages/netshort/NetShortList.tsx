@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { Play } from "lucide-react";
 
 interface NetShortItem {
-  id: string;
-  title: string;
-  cover: string;
+  shortPlayId: string;
+  shortPlayName: string;
+  shortPlayCover: string;
 }
 
 export default function NetShortList() {
@@ -16,8 +16,10 @@ export default function NetShortList() {
     fetch("https://api.sansekai.my.id/api/netshort/foryou")
       .then((res) => res.json())
       .then((json) => {
-        setData(json.data || []);
+        // 🔥 INI KUNCI UTAMA
+        setData(Array.isArray(json.contentInfos) ? json.contentInfos : []);
       })
+      .catch(() => setData([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -32,11 +34,32 @@ export default function NetShortList() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {data.map((item) => (
-            <div key={item.id} className="relative rounded-lg overflow-hidden">
+            <div
+              key={item.shortPlayId}
+              className="relative rounded-lg overflow-hidden"
+            >
               <img
-                src={item.cover}
-                alt={item.title}
+                src={item.shortPlayCover}
+                alt={item.shortPlayName}
                 className="w-full aspect-[3/4] object-cover"
               />
 
-              {/* TOMBOL PLAY */}
+              {/* ▶️ PLAY */}
+              <Link
+                to={`/watch/netshort/${item.shortPlayId}`}
+                className="absolute inset-0 flex items-center justify-center
+                           bg-black/40 opacity-0 hover:opacity-100 transition"
+              >
+                <Play className="w-12 h-12 text-white" />
+              </Link>
+
+              <p className="mt-2 text-sm line-clamp-2">
+                {item.shortPlayName}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
