@@ -114,13 +114,11 @@ useEffect(() => {
   saveWatchHistory({
     id: String(book.bookId),
     title: book.bookName,
-    poster:
-      book.coverVertical ||
-      book.coverHorizontal ||
-      "",
+    poster: book.coverVertical || book.coverHorizontal || "",
     lastWatched: Date.now(),
+    episodeIndex: currentEpisode, // Tambahkan ini agar bisa lanjut dari episode terakhir
   });
-}, [detailData]);
+}, [detailData, currentEpisode]); 
 
   
   // Now we can have early returns AFTER all hooks
