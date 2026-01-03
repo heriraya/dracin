@@ -6,15 +6,21 @@ import type { Drama } from "@/types/drama";
 
 const API_BASE = "https://api.sansekai.my.id/api/dramabox";
 
-type ClassifyType = "terbaru" | "terpopuler";
+type ClassifyType = "terbaru" | "terpopuler" | "vip";
 
 async function fetchDubindoDramas(classify: ClassifyType, page: number): Promise<Drama[]> {
-  const response = await fetch(
-    `${API_BASE}/dubindo?classify=${classify}&page=${page}`
-  );
+  // Gunakan endpoint berbeda untuk VIP
+  const endpoint = classify === "vip" ? "vip" : "dubindo";
+  
+  // Untuk VIP, tidak perlu parameter classify
+  const url = classify === "vip" 
+    ? `${API_BASE}/${endpoint}?page=${page}`
+    : `${API_BASE}/${endpoint}?classify=${classify}&page=${page}`;
+  
+  const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch dubbing dramas");
+    throw new Error("Failed to fetch dramas");
   }
   return response.json();
 }
@@ -24,7 +30,7 @@ export default function DubbingIndo() {
   const [page, setPage] = useState(1);
 
   const { data: dramas, isLoading, isFetching } = useQuery({
-    queryKey: ["dramas", "dubindo", "vip", classify, page],
+    queryKey: ["dramas", "dubindo", classify, page],
     queryFn: () => fetchDubindoDramas(classify, page),
     staleTime: 1000 * 60 * 5,
   });
@@ -68,6 +74,16 @@ export default function DubbingIndo() {
             }`}
           >
             Terpopuler
+          </button>
+          <button
+            onClick={() => handleClassifyChange("vip")}
+            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
+              classify === "vip"
+                ? "bg-primary text-primary-foreground"
+                : "glass hover:bg-muted/50"
+            }`}
+          >
+            VIP
           </button>
         </div>
 
