@@ -30,6 +30,7 @@ const App = () => (
           <Route path="/detail/:bookId" element={<Detail />} />
           <Route path="/watch/:bookId" element={<Watch />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/history" element={<History />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
