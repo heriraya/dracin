@@ -6,23 +6,13 @@ import {
 } from "@/utils/watchHistory";
 
 export default function History() {
-  const [history, setHistory] = useState<WatchHistoryItem[] | null>(null);
+  return (
+    <div style={{ color: "white", padding: 40 }}>
+      HISTORY PAGE LOADED
+    </div>
+  );
+}
 
-  useEffect(() => {
-    setHistory(getWatchHistory());
-  }, []);
-
-  if (history === null) {
-    return null; // hindari flicker
-  }
-
-  if (!history.length) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-        Belum ada riwayat tontonan
-      </div>
-    );
-  }
 
   return (
     <main className="p-4 max-w-6xl mx-auto">
