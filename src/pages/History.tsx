@@ -6,15 +6,19 @@ import {
 } from "@/utils/watchHistory";
 
 export default function History() {
-  const [history, setHistory] = useState<WatchHistoryItem[]>([]);
+  const [history, setHistory] = useState<WatchHistoryItem[] | null>(null);
 
   useEffect(() => {
     setHistory(getWatchHistory());
   }, []);
 
+  if (history === null) {
+    return null; // hindari flicker
+  }
+
   if (!history.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         Belum ada riwayat tontonan
       </div>
     );
