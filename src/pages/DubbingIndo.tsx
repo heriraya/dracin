@@ -6,7 +6,7 @@ import type { Drama } from "@/types/drama";
 
 const API_BASE = "https://api.sansekai.my.id/api/dramabox";
 
-type ClassifyType = "terbaru" | "terpopuler" | "vip";
+type ClassifyType = "terbaru" | "terpopuler";
 
 async function fetchDubindoDramas(classify: ClassifyType, page: number): Promise<Drama[]> {
   const response = await fetch(
@@ -68,16 +68,6 @@ export default function DubbingIndo() {
             }`}
           >
             Terpopuler
-          </button>
-          <button
-            onClick={() => handleClassifyChange("vip")}
-            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
-              classify === "terpopuler"
-                ? "bg-primary text-primary-foreground"
-                : "glass hover:bg-muted/50"
-            }`}
-          >
-            VIP
           </button>
         </div>
 
