@@ -3,6 +3,7 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useDramaDetail, useEpisodes } from "@/hooks/useDramaDetail";
 import { ChevronLeft, ChevronRight, Play, Loader2, Settings } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { saveWatchHistory } from "@/utils/watchHistory";
 
 const EPISODES_PER_PAGE = 30;
 
@@ -103,6 +104,17 @@ export default function Watch() {
     }
   };
 
+  useEffect(() => {
+  if (!detail) return;
+
+  saveWatchHistory({
+    id: detail.id,
+    title: detail.title,
+    poster: detail.poster,
+    lastWatched: Date.now(),
+  });
+}, [detail]);
+  
   // Now we can have early returns AFTER all hooks
   if (detailLoading || episodesLoading) {
     return (
