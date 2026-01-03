@@ -4,8 +4,7 @@ import type { Drama, SearchResult } from "@/types/drama";
 const API_BASE = "https://api.sansekai.my.id/api/dramabox";
 
 async function fetchDramas(endpoint: string): Promise<Drama[]> {
-  const response = await fetch(`${API_BASE}/${endpoint}`);
-
+  const response = await fetch(`${API_BASE}/${endpoint}`); // ← Perbaiki: fetch(...)
   if (!response.ok) {
     throw new Error("Failed to fetch dramas");
   }
@@ -14,9 +13,7 @@ async function fetchDramas(endpoint: string): Promise<Drama[]> {
 
 async function searchDramas(query: string): Promise<SearchResult[]> {
   if (!query.trim()) return [];
-
-  const response = await fetch(`${API_BASE}/search?query=${encodeURIComponent(query)}`);
-
+  const response = await fetch(`${API_BASE}/search?query=${encodeURIComponent(query)}`); // ← Perbaiki: fetch(...)
   if (!response.ok) {
     throw new Error("Failed to search dramas");
   }
@@ -49,7 +46,6 @@ export function useTrendingDramas() {
 
 export function useSearchDramas(query: string) {
   const normalizedQuery = query.trim();
-
   return useQuery({
     queryKey: ["dramas", "search", normalizedQuery],
     queryFn: () => searchDramas(normalizedQuery),
