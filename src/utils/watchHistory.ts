@@ -7,28 +7,34 @@ export interface WatchHistoryItem {
 
 const KEY = "watch_history";
 
+function isBrowser() {
+  return typeof window !== "undefined";
+}
+
 export function getWatchHistory(): WatchHistoryItem[] {
+  if (!isBrowser()) return [];
+
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    const raw = window.localStorage.getItem(KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
   } catch {
     return [];
   }
 }
 
 export function saveWatchHistory(item: WatchHistoryItem) {
-  const history = getWatchHistory();
+  if (!isBrowser()) return;
 
-  // hapus duplikat
+  const history = getWatchHistory();
   const filtered = history.filter((h) => h.id !== item.id);
 
-  filtered.unshift({
-    ...item,
-    lastWatched: Date.now(),
-  });
+  filtered.unshift(item);
 
-  localStorage.setItem(KEY, JSON.stringify(filtered.slice(0, 100)));
+  window.localStorage.setItem(KEY, JSON.stringify(filtered.slice(0, 100)));
 }
 
 export function clearWatchHistory() {
-  localStorage.removeItem(KEY);
+  if (!isBrowser()) return;
+  window.localStorage.removeItem(KEY);
 }
